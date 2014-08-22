@@ -46,9 +46,13 @@
                 </div>
             </div>
         </form>
-        <div ng-repeat="comment in comments.data.children">
-            {{comment.data.body}}
-        </div>
+        <ol>
+            <li ng-repeat="comment in comments.data.children">{{comment.data.body}}</li>
+        </ol>
+        <ul class="pager">
+          <li><a href="#">Previous</a></li>
+          <li><a href="#">Next</a></li>
+        </ul>
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
