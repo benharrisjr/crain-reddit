@@ -47,7 +47,7 @@
             </div>
         </form>
         <ol>
-            <li ng-repeat="comment in comments.data.children track by $index">{{comment.data.body}}</li>
+            <li ng-repeat="comment in comments track by $index">{{comment.data.body}}</li>
         </ol>
         <ul class="pager">
           <li><a href="#">Previous</a></li>
@@ -66,7 +66,7 @@
               url: baseUrl + user + USER_DATA,
               method: "GET"
             }).success(function (data, status, headers, config){
-              $scope.comments = data;
+              $scope.comments = data.data.children;
               $scope.status = status;
             }).error(function (data, status, headers, config){
               $scope.data = data || "Request failed";
