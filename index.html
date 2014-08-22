@@ -47,7 +47,7 @@
             </div>
         </form>
         <ol>
-            <li ng-repeat="comment in comments.data.children">{{comment.data.body}}</li>
+            <li ng-repeat="comment in comments.data.children track by $index">{{comment.data.body}}</li>
         </ol>
         <ul class="pager">
           <li><a href="#">Previous</a></li>
