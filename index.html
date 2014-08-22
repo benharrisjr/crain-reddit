@@ -2,10 +2,10 @@
 <html ng-app>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Al Bhed Translator</title>
+    <title>Reddit User Comments</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 </head>
-<body ng-controller="TranslatorController">
+<body ng-controller="RedditCommentController">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -26,91 +26,49 @@
                 <li><a href="/al-bhed">Al Bhed Translator</a></li>
                 <li><a href="/crain-reddit">Crain Reddit</a></li>
                 <li><a href="/dice-app">Dice App</a></li>
-                <!-- <li class="divider"></li> -->
-                <!-- <li class="dropdown-header">Games</li> -->
-                <!-- <li><a href="/click-quest">Click Quest</a></li> -->
               </ul>
             </li>
           </ul>
-        </div><!--/.navbar-collapse -->
+        </div>
       </div>
     </nav>
     <main class="container" style="padding-top: 50px;">
-        <h2>English to Al Bhed Translator</h2>
-        <p class="well">Input the text you would like translated from english to Al Bhed in the top box, it will automatically be translated in the bottom box. You can also type Al Bhed in the bottom box to translate it into English.</p>
-        <label for="untranslated">English</label>
-        <textarea class="form-control" rows="3" id="untranslated" data-ng-model="englishText" ng-change="change(englishText,englishToAlbhed,0)" placeholder="{{untranslatedSample}}"></textarea>
-        <label for="translated">Al Bhed</label>
-        <textarea class="form-control" rows="3" id="translated" data-ng-model="albhedText" ng-change="change(albhedText,albhedToEnglish,1)" placeholder="{{translatedSample}}"></textarea>
+        <h2 class="text-center">Paginated List of Reddit User Comments</h2>
+        <p class="well">Input the name of the reddit user whose comment list you would like to retrieve.</p>
+        <form class="form-horizontal" role="form" no-validate>
+            <div class="form-group">
+                <label for="reddit-user" class="control-label col-md-2">Username</label>
+                <div class="col-md-6">
+                    <input class="form-control" type="text" id="reddit-user" placeholder="Username" ng-model="userName">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-success" ng-click="GetUserComments(userName)"><span class="glyphicon glyphicon-search"></span> Get comments for User</button>
+                </div>
+            </div>
+        </form>
+        <div ng-repeat="comment in comments.data.children">
+            {{comment.data.body}}
+        </div>
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
 <script type="text/javascript">
-    function TranslatorController($scope) {
-
-        $scope.changeOrder = function(){
-            console.log($scope.order);
-            if ($scope.order === $scope.orders[0]){
-                console.log("changing");
-                $scope.order = $scope.orders[1];
-            }
-            else if ($scope.order === $scope.orders[1]){
-                $scope.order = $scope.orders[0];
-            }
-            console.log($scope.order);
-        }
-
-        // map of English letters to Al Bhed letters
-        $scope.englishToAlbhed = {
-            'a':'y','b':'p','c':'l','d':'t','e':'a','f':'v','g':'k','h':'r','i':'e','j':'z','k':'g','l':'m','m':'s',
-            'n':'h','o':'u','p':'b','q':'x','r':'n','s':'c','t':'d','u':'i','v':'j','w':'f','x':'q','y':'o','z':'w'
-        };
-        // map of Al Bhed letters to English letters
-        $scope.albhedToEnglish = new Object;
-        for (var letter in $scope.englishToAlbhed){
-           $scope.albhedToEnglish[$scope.englishToAlbhed[letter]] = letter; 
-        }
-        
-        $scope.englishText = "";
-        $scope.albhedText = "";
-        $scope.change = function(s, map, order) {
-            var output = new Array;
-            var passthrough = false;
-
-            for (var i = 0, len = s.length; i < len; i++)
-            {
-                var c = s.charAt(i), l;
-
-                if (!passthrough)
-                {
-                if (c in map)
-                c = map[c];
-                else if ((l = c.toLowerCase()) in map)
-                c = map[l].toUpperCase()
-                else if (c == '[')
-                passthrough = true;
-            }
-            else if (c == ']')
-                passthrough = false;
-
-                output.push(c);
-            }
-
-            if(order === 0){
-                console.log(order);
-                $scope.albhedText = output.join('');
-            }
-            if(order === 1){
-                console.log(order);
-                $scope.englishText = output.join('');
-            }
-            
-            // $scope.albhedText = output.join('');
-            return output.join('');
-        };
-        $scope.untranslatedSample = "Sample text";
-        $scope.translatedSample = $scope.change($scope.untranslatedSample, $scope.englishToAlbhed);
+    function RedditCommentController($scope,$http) {
+        var baseUrl = "http://www.reddit.com/user/";
+        var USER_DATA = "/comments.json";
+        $scope.GetUserComments = function(user){
+            $http({
+              url: baseUrl + user + USER_DATA,
+              method: "GET"
+            }).success(function (data, status, headers, config){
+              $scope.comments = data;
+              $scope.status = status;
+            }).error(function (data, status, headers, config){
+              $scope.data = data || "Request failed";
+              $scope.status = status;
+            });  
+        }    
     }
 </script>
 </body>
