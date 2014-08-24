@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Reddit User Comments</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body ng-controller="RedditCommentController">
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -33,45 +34,76 @@
       </div>
     </nav>
     <main class="container" style="padding-top: 50px;">
-        <h2 class="text-center">Paginated List of Reddit User Comments</h2>
-        <p class="well">Input the name of the reddit user whose comment list you would like to retrieve.</p>
-        <form class="form-horizontal" role="form" no-validate>
+        <h2 class="text-center row">Paginated List of Reddit User Comments</h2>
+        <p class="well row">Input the name of the reddit user whose comment list you would like to retrieve.</p>
+        <form class="form-horizontal row" role="form" no-validate>
             <div class="form-group">
                 <label for="reddit-user" class="control-label col-md-2">Username</label>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <input class="form-control" type="text" id="reddit-user" placeholder="Username" ng-model="userName">
+                     <span class="error" ng-show="myForm.input.$error.required">Required!</span>
                 </div>
                 <div class="col-md-4">
                     <button class="btn btn-success" ng-click="GetUserComments(userName)"><span class="glyphicon glyphicon-search"></span> Get comments for User</button>
                 </div>
+                <label for="comment-limit" class="control-label col-md-1">Limit</label>
+                <div class="col-md-1">
+                    <input class="form-control" type="number" id="comment-limit" ng-model="limit">
+                </div>
             </div>
         </form>
-        <ol>
-            <li ng-repeat="comment in comments track by $index">{{comment.data.body}}</li>
-        </ol>
-        <ul class="pager">
-          <li><a href="#">Previous</a></li>
-          <li><a href="#">Next</a></li>
+        <ul class="list-unstyled row">
+            <li ng-repeat="comment in comments track by $index">
+              <a href="{{comment.data.link_url}}">{{comment.data.link_title}}</a>
+              <dl class="dl-horizontal">
+                <dt>Date Posted</dt>
+                <dd>{{comment.data.created_utc * 1000 | date:'MM/dd/yyyy'}}</dd><!-- * 1000 Because javascript UTC is milliseconds -->
+                <dt>Comment</dt>
+                <dd>{{comment.data.body}}</dd>
+                <dt>Score</dt>
+                <dd>{{comment.data.score}}</dd>
+              </dl>
+            </li>
+        </ul>
+        <ul class="pager" ng-if="searched">
+          <li ng-if="before !== null"><a ng-click="GetUserComments(userName,count,before,'',limit)">Previous</a></li>
+          <li ng-if="after !== null"><a ng-click="GetUserComments(userName,count,'',after,limit)">Next</a></li>
         </ul>
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-sanitize.min.js"></script>-->
 <script type="text/javascript">
     function RedditCommentController($scope,$http) {
         var baseUrl = "http://www.reddit.com/user/";
-        var USER_DATA = "/comments.json";
-        $scope.GetUserComments = function(user){
+        $scope.searched = false;
+        $scope.noUser = false;
+        $scope.limit = 25;
+        $scope.GetUserComments = function(user,commentCount,before,after,commentLimit){
+          if(commentCount < $scope.limit){
+            commentCount = $scope.limit + 1;
+          }
+          var url_data = "/comments.json?count=" + commentCount  + "&after=" + after + "&before=" + before + "&limit=" + commentLimit;
+          if (user === ""){
+            $scope.noUser = true;
+          }
+          else{
             $http({
-              url: baseUrl + user + USER_DATA,
+              url: baseUrl + user + url_data,
               method: "GET"
             }).success(function (data, status, headers, config){
+              $scope.searched = true;
               $scope.comments = data.data.children;
+              $scope.count = $scope.comments.length;
+              $scope.after = data.data.after;
+              $scope.before = data.data.before;
               $scope.status = status;
             }).error(function (data, status, headers, config){
               $scope.data = data || "Request failed";
               $scope.status = status;
-            });  
+            });
+          }
         }    
     }
 </script>
