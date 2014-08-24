@@ -34,7 +34,7 @@
       </div>
     </nav>
     <main class="container" style="padding-top: 50px;">
-        <h2 class="text-center row">Paginated List of Reddit User Comments</h2>
+        <h2 id="top-element" class="text-center row">Paginated List of Reddit User Comments</h2>
         <p class="well row">Input the name of the reddit user whose comment list you would like to retrieve.</p>
         <form class="form-horizontal row" role="form" no-validate>
             <div class="form-group">
@@ -75,7 +75,7 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
     <!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-sanitize.min.js"></script>-->
 <script type="text/javascript">
-    function RedditCommentController($scope,$http) {
+    function RedditCommentController($scope,$http,$location,$anchorScroll) {
         var baseUrl = "http://www.reddit.com/user/";
         $scope.searched = false;
         $scope.noUser = false;
@@ -93,12 +93,16 @@
               url: baseUrl + user + url_data,
               method: "GET"
             }).success(function (data, status, headers, config){
-              $scope.searched = true;
               $scope.comments = data.data.children;
               $scope.count = $scope.comments.length;
               $scope.after = data.data.after;
               $scope.before = data.data.before;
+              if($scope.searched === true){
+                $location.hash("top-element");
+                $anchorScroll();
+              }
               $scope.status = status;
+              $scope.searched = true;
             }).error(function (data, status, headers, config){
               $scope.data = data || "Request failed";
               $scope.status = status;
